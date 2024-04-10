@@ -1,4 +1,5 @@
-﻿using MaterialSkin.Controls;
+﻿using MaterialSkin;
+using MaterialSkin.Controls;
 using System.Data.SqlClient;
 
 namespace Book_Rental_System
@@ -14,6 +15,10 @@ namespace Book_Rental_System
         public RegisterForm()
         {
             InitializeComponent();
+            MaterialSkinManager skinManager = MaterialSkinManager.Instance;
+            skinManager.AddFormToManage(this);
+            skinManager.Theme = MaterialSkinManager.Themes.DARK;
+            skinManager.ColorScheme = new ColorScheme(Primary.Green900, Primary.BlueGrey900, Primary.Blue500, Accent.Orange700, TextShade.WHITE);
         }
 
         private void RegisterForm_Load(object sender, EventArgs e)
@@ -23,6 +28,7 @@ namespace Book_Rental_System
             sqlConnection.Open();
         }
 
+        #region events
         private void RegisterButton_Click(object sender, EventArgs e)
         {
             CheckForEmptyFields();
@@ -34,10 +40,26 @@ namespace Book_Rental_System
             ConfirmPasswordAndCheckUsername();
         }
 
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            dateTimePicker.CustomFormat = "dd/mm/yyyy";
+        }
+
+        private void dateTimePicker1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back)
+            {
+                dateTimePicker.CustomFormat = " ";
+            }
+        }
+
+        #endregion
+
+        #region functions
         private void CheckForEmptyFields()
         {
-            if (!CheckIfTextBoxIsNull(firstNameBox) && !CheckIfTextBoxIsNull(lastNameBox) && !CheckIfTextBoxIsNull(emailBox) &&
-                !CheckDateBox(dateTimePicker) && !CheckIfTextBoxIsNull(userNameBox) && !CheckIfTextBoxIsNull(passwordBox) && !CheckIfTextBoxIsNull(confirmPasswordBox))
+            if (!StaticFunctions.CheckIfTextBoxIsNull(firstNameBox) && !StaticFunctions.CheckIfTextBoxIsNull(lastNameBox) && !StaticFunctions.CheckIfTextBoxIsNull(emailBox) &&
+                !StaticFunctions.CheckDateBox(dateTimePicker) && !StaticFunctions.CheckIfTextBoxIsNull(userNameBox) && !StaticFunctions.CheckIfTextBoxIsNull(passwordBox) && !StaticFunctions.CheckIfTextBoxIsNull(confirmPasswordBox))
             {
                 emptyFieldsExist = true;
                 MessageBox.Show("Please Fill All Fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -71,6 +93,12 @@ namespace Book_Rental_System
             else
             {
                 InsertInformation();
+                MessageBox.Show("Account Created", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                this.Hide();
+                LoginForm loginForm = new LoginForm();
+                loginForm.ShowDialog();
+                this.Close();
             }
         }
 
@@ -86,40 +114,8 @@ namespace Book_Rental_System
             sqlCommand.Parameters.AddWithValue("date", dateTimePicker.Value);
             sqlCommand.Parameters.AddWithValue("username", userNameBox.Text);
             sqlCommand.Parameters.AddWithValue("password", passwordBox.Text);
-
             sqlCommand.ExecuteNonQuery();
-            MessageBox.Show("Account Created", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
-        private bool CheckIfTextBoxIsNull(MaterialTextBox2 textBox)
-        {
-            if (textBox.Text == String.Empty)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private bool CheckDateBox(DateTimePicker dateTimePicker)
-        {
-            if (dateTimePicker.Text == String.Empty)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
-        {
-            dateTimePicker.CustomFormat = "dd/mm/yyyy";
-        }
-
-        private void dateTimePicker1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.KeyCode == Keys.Back)
-            {
-                dateTimePicker.CustomFormat = " ";
-            }
-        }
+#endregion
     }
 }
